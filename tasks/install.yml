@@ -31,7 +31,7 @@
 
 - name: "install asdf global dependencies with pacman"
   pacman:
-    name: "{{ asdf_pacman_gloabal_dependencies }}"
+    name: "{{ asdf_pacman_global_dependencies }}"
     state: present
   become: True
   retries: "{{ remote_package_retries }}"
