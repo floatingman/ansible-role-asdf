@@ -27,7 +27,7 @@
   register: pacman_result
   until: pacman_result is succeeded
   become: True
-  when: ansible_os_family == "Archlinux"
+  when: ansible_os_family == "Archlinux" and asdf_pacman_optional_dependencies > 0
 
 - name: "install plugins"
   command: "bash -lc 'asdf plugin-add {{ item.name }} {{ item.repository | default() }}'"
