@@ -19,6 +19,16 @@
   become: True
   when: ansible_os_family == "RedHat"
 
+- name: "install nodejs dependencies with pacman"
+  pacman:
+    name: "{{ asdf_pacman_nodejs_dependencies }}"
+    state: present
+  retries: "{{ remote_package_retries }}"
+  register: pacman_nodejs_result
+  until: pacman_nodejs_result is succeeded
+  become: True
+  when: ansible_os_family == "Archlinux"
+
 - name: "set vars"
   set_fact:
     asdf_nodejs_keyring: "{{ asdf_user_home }}/.asdf/keyrings/nodejs"

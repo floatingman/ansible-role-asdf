@@ -18,3 +18,13 @@
   until: yum_erlang_result is succeeded
   become: True
   when: ansible_os_family == "RedHat"
+
+- name: "install erlang dependencies with pacman"
+  pacman:
+    name: "{{ asdf_pacman_erlang_dependencies }}"
+    state: present
+  retries: "{{ remote_package_retries }}"
+  register: pacman_erlang_result
+  until: pacman_erlang_result is succeeded
+  become: True
+  when: ansible_os_family == "Archlinux"

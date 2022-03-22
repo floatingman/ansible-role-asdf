@@ -19,6 +19,16 @@
   become: True
   when: ansible_os_family == "RedHat"
 
+- name: "install plugin dependencies with pacman"
+  pacman:
+    name: "{{ asdf_pacman_optional_dependencies }}"
+    state: present
+  retries: "{{ remote_package_retries }}"
+  register: pacman_result
+  until: pacman_result is succeeded
+  become: True
+  when: ansible_os_family == "Archlinux"
+
 - name: "install plugins"
   command: "bash -lc 'asdf plugin-add {{ item.name }} {{ item.repository | default() }}'"
   args:

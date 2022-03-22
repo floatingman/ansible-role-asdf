@@ -29,6 +29,16 @@
   until: yum_deps_result is succeeded
   when: ansible_os_family == "RedHat"
 
+- name: "install asdf global dependencies with pacman"
+  pacman:
+    name: "{{ asdf_pacman_gloabal_dependencies }}"
+    state: present
+  become: True
+  retries: "{{ remote_package_retries }}"
+  register: pacman_deps_result
+  until: pacamn_deps_result is succeeded
+  when: ansible_os_family == "Archlinux"
+
 - name: "install asdf"
   git:
     repo: "https://github.com/asdf-vm/asdf.git"
