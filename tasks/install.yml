@@ -77,6 +77,14 @@
   become: True
   become_user: "{{ asdf_user }}"
 
+- name: "build asdf binary"
+  command: make build
+  args:
+    chdir: "{{ asdf_dir }}"
+    creates: "{{ asdf_dir }}/asdf"
+  become: True
+  become_user: "{{ asdf_user }}"
+
 - name: "source asdf script"
   template:
     src: "asdf.sh.j2"
