@@ -76,14 +76,20 @@
     version: "{{ asdf_version }}"
   become: True
   become_user: "{{ asdf_user }}"
+  register: asdf_git_result
+
+- name: "check if asdf binary exists"
+  stat:
+    path: "{{ asdf_dir }}/asdf"
+  register: asdf_binary_stat
 
 - name: "build asdf binary"
   command: make build
   args:
     chdir: "{{ asdf_dir }}"
-    creates: "{{ asdf_dir }}/asdf"
   become: True
   become_user: "{{ asdf_user }}"
+  when: asdf_git_result.changed or not asdf_binary_stat.stat.exists
 
 - name: "copy asdf binary to bin directory"
   copy:
