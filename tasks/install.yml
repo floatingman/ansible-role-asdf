@@ -85,6 +85,16 @@
   become: True
   become_user: "{{ asdf_user }}"
 
+- name: "copy asdf binary to bin directory"
+  copy:
+    src: "{{ asdf_dir }}/asdf"
+    dest: "{{ asdf_dir }}/bin/asdf"
+    remote_src: yes
+    mode: '0755'
+    owner: "{{ asdf_user }}"
+    group: "{{ asdf_group }}"
+  become: True
+
 - name: "source asdf script"
   template:
     src: "asdf.sh.j2"
