@@ -74,6 +74,8 @@
     repo: "https://github.com/asdf-vm/asdf.git"
     dest: "{{ asdf_dir }}"
     version: "{{ asdf_version }}"
+    update: yes
+    force: yes
   become: True
   become_user: "{{ asdf_user }}"
   register: asdf_git_result
