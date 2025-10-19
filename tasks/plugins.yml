@@ -30,7 +30,7 @@
   when: ansible_os_family == "Archlinux" and asdf_pacman_optional_dependencies|length > 0
 
 - name: "install plugins"
-  command: "asdf plugin-add {{ item.name }} {{ item.repository | default() }}"
+  command: "asdf plugin add {{ item.name }} {{ item.repository | default() }}"
   args:
     creates: "{{ asdf_dir }}/plugins/{{ item.name }}"
   environment:
@@ -111,11 +111,11 @@
     owner: "{{ asdf_user }}"
     group: "{{ asdf_group }}"
     mode: 0644
-  become: True
+  become: true
   become_user: "{{ asdf_user }}"
 
 - name: "set group permissions"
-  become: yes
+  become: true
   file:
     path: "{{ asdf_dir }}"
     owner: "{{ asdf_user }}"
