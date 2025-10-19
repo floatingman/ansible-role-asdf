@@ -6,7 +6,7 @@ An Ansible Role that installs [asdf](https://github.com/asdf-vm/asdf.git) versio
 
 ## Requirements
 
-None
+- Go (golang) is required for building ASDF version 0.16.0 and newer. The role automatically installs Go as a dependency on supported platforms (Debian/Ubuntu, RedHat/CentOS, Arch Linux).
 
 ## Role Variables
 
@@ -58,8 +58,10 @@ asdf_plugin_dependencies: []
 The variable `asdf_version` sets the git tag of asdf:
 
 ```yaml
-asdf_version: v0.9.0
+asdf_version: v0.18.0
 ```
+
+**Note:** Starting with version 0.16.0, ASDF is written in Go and requires compilation during installation. The role automatically handles building the binary after cloning the repository.
 
 ## Dependencies
 
