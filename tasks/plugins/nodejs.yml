@@ -8,7 +8,7 @@
   register: apt_nodejs_result
   until: apt_nodejs_result is succeeded
   become: True
-  when: ansible_os_family == "Debian"
+  when: ansible_facts['os_family'] == "Debian"
 
 - name: "install nodejs dependencies with yum"
   yum:
@@ -17,7 +17,7 @@
   register: yum_nodejs_result
   until: yum_nodejs_result is succeeded
   become: True
-  when: ansible_os_family == "RedHat"
+  when: ansible_facts['os_family'] == "RedHat"
 
 - name: "install nodejs dependencies with pacman"
   pacman:
@@ -27,4 +27,4 @@
   register: pacman_nodejs_result
   until: pacman_nodejs_result is succeeded
   become: True
-  when: ansible_os_family == "Archlinux"
+  when: ansible_facts['os_family'] == "Archlinux"
