@@ -8,7 +8,7 @@
   register: apt_result
   until: apt_result is succeeded
   become: True
-  when: ansible_os_family == "Debian"
+  when: ansible_facts['os_family'] == "Debian"
 
 - name: "install plugin dependencies with yum"
   yum:
@@ -17,7 +17,7 @@
   register: yum_result
   until: yum_result is succeeded
   become: True
-  when: ansible_os_family == "RedHat"
+  when: ansible_facts['os_family'] == "RedHat"
 
 - name: "install plugin dependencies with pacman"
   pacman:
@@ -27,16 +27,16 @@
   register: pacman_result
   until: pacman_result is succeeded
   become: True
-  when: ansible_os_family == "Archlinux" and asdf_pacman_optional_dependencies|length > 0
+  when: ansible_facts['os_family'] == "Archlinux" and asdf_pacman_optional_dependencies|length > 0
 
 - name: "install plugins"
   command: "asdf plugin add {{ item.name }} {{ item.repository | default() }}"
   args:
     creates: "{{ asdf_dir }}/plugins/{{ item.name }}"
   environment:
-    PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
+    PATH: "/usr/local/bin:{{ ansible_facts.env.PATH }}"
     ASDF_DATA_DIR: "{{ asdf_dir }}"
-  with_items: "{{ asdf_plugins }}"
+  loop: "{{ asdf_plugins }}"
   when: asdf_plugins | length > 0
   become: True
   become_user: "{{ asdf_user }}"
@@ -45,35 +45,31 @@
 - name: "nodejs specific tasks"
   include_tasks: "plugins/nodejs.yml"
   when: '"nodejs" in item["name"]'
-  with_items: "{{ asdf_plugins }}"
+  loop: "{{ asdf_plugins }}"
 
 - name: "erlang specific tasks"
   include_tasks: "plugins/erlang.yml"
   when: '"erlang" in item["name"]'
-  with_items: "{{ asdf_plugins }}"
+  loop: "{{ asdf_plugins }}"
 
 - name: "ruby specific tasks"
   include_tasks: "plugins/ruby.yml"
   when: '"ruby" in item["name"]'
-  with_items: "{{ asdf_plugins }}"
+  loop: "{{ asdf_plugins }}"
 
 - name: "php specific tasks"
   include_tasks: "plugins/php.yml"
   when: '"php" in item["name"]'
-  with_items: "{{ asdf_plugins }}"
+  loop: "{{ asdf_plugins }}"
 
 - name: "install apps"
   command: "asdf install {{ item.0.name }} {{ item.1 }}"
   args:
     creates: "{{ asdf_dir }}/installs/{{ item.0.name }}/{{ item.1 }}"
   environment:
-    PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
+    PATH: "/usr/local/bin:{{ ansible_facts.env.PATH }}"
     ASDF_DATA_DIR: "{{ asdf_dir }}"
-  with_subelements:
-    - "{{ asdf_plugins }}"
-    - versions
-    - flags:
-      skip_missing: True
+  loop: "{{ asdf_plugins | subelements('versions', skip_missing=True) }}"
   when: asdf_plugins | length > 0
   become: True
   become_user: "{{ asdf_user }}"
@@ -83,13 +79,9 @@
   args:
     removes: "{{ asdf_dir }}/installs/{{ item.0.name }}/{{ item.1 }}"
   environment:
-    PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
+    PATH: "/usr/local/bin:{{ ansible_facts.env.PATH }}"
     ASDF_DATA_DIR: "{{ asdf_dir }}"
-  with_subelements:
-    - "{{ asdf_plugins }}"
-    - delete_versions
-    - flags:
-      skip_missing: True
+  loop: "{{ asdf_plugins | subelements('delete_versions', skip_missing=True) }}"
   when: asdf_plugins | length > 0
   become: True
   become_user: "{{ asdf_user }}"
@@ -97,10 +89,10 @@
 - name: "set global app versions"
   command: "asdf set -u {{ item.name }} {{ item.global | default(item.versions | difference(item.delete_versions|default([])) | sort | first) }}"
   environment:
-    PATH: "/usr/local/bin:{{ ansible_env.PATH }}"
+    PATH: "/usr/local/bin:{{ ansible_facts.env.PATH }}"
     ASDF_DATA_DIR: "{{ asdf_dir }}"
   when: item.versions is defined
-  with_items: "{{ asdf_plugins }}"
+  loop: "{{ asdf_plugins }}"
   become: True
   become_user: "{{ asdf_user }}"
 

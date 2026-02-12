@@ -8,17 +8,17 @@
 
 - name: "set asdf_config_file based on home directory"
   set_fact:
-    asdf_config_file: "{{ getent_passwd[asdf_user][4] }}/.asdfrc"
+    asdf_config_file: "{{ ansible_facts.getent_passwd[asdf_user][4] }}/.asdfrc"
   when: asdf_dir is undefined and asdf_config_file is undefined
 
 - name: "set asdf_default_tool_versions_file based on home directory"
   set_fact:
-    asdf_default_tool_versions_file: "{{ getent_passwd[asdf_user][4] }}/.tool-versions"
+    asdf_default_tool_versions_file: "{{ ansible_facts.getent_passwd[asdf_user][4] }}/.tool-versions"
   when: asdf_dir is undefined and asdf_default_tool_versions_file is undefined
 
 - name: "set asdf_dir variable based on home directory"
   set_fact:
-    asdf_dir: "{{ getent_passwd[asdf_user][4] }}/.asdf"
+    asdf_dir: "{{ ansible_facts.getent_passwd[asdf_user][4] }}/.asdf"
   when: asdf_dir is undefined
 
 - name: "set asdf_config_file variable based on asdf_dir"
@@ -40,7 +40,7 @@
   retries: "{{ remote_package_retries }}"
   register: apt_deps_result
   until: apt_deps_result is succeeded
-  when: ansible_os_family == "Debian"
+  when: ansible_facts['os_family'] == "Debian"
 
 - name: "install asdf global dependencies with yum"
   yum:
@@ -49,7 +49,7 @@
   retries: "{{ remote_package_retries }}"
   register: yum_deps_result
   until: yum_deps_result is succeeded
-  when: ansible_os_family == "RedHat"
+  when: ansible_facts['os_family'] == "RedHat"
 
 - name: "install asdf global dependencies with pacman"
   pacman:
@@ -59,7 +59,7 @@
   retries: "{{ remote_package_retries }}"
   register: pacman_deps_result
   until: pacman_deps_result is succeeded
-  when: ansible_os_family == "Archlinux"
+  when: ansible_facts['os_family'] == "Archlinux"
 
 - name: "ensure asdf_dir presence and ownership"
   file:
@@ -91,7 +91,7 @@
   become: True
   become_user: "{{ asdf_user }}"
   environment:
-    PATH: "/usr/bin:/usr/local/bin:{{ ansible_env.PATH }}"
+    PATH: "/usr/bin:/usr/local/bin:{{ ansible_facts.env.PATH }}"
 
 - name: "create asdf bin symlink directory"
   file:
