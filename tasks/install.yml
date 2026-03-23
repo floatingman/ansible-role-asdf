@@ -91,7 +91,7 @@
   become: True
   become_user: "{{ asdf_user }}"
   environment:
-    PATH: "/usr/bin:/usr/local/bin:{{ ansible_facts.env.PATH }}"
+    PATH: "/usr/local/bin:/usr/bin:{{ ansible_facts.env.PATH }}"
 
 - name: "create asdf bin symlink directory"
   file:
