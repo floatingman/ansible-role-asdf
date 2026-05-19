@@ -112,5 +112,6 @@
     path: "{{ asdf_dir }}"
     owner: "{{ asdf_user }}"
     group: "{{ asdf_group }}"
+    mode: "0775"
     state: directory
     recurse: yes

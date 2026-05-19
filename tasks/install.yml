@@ -1,32 +1,10 @@
 ---
-- name: "get users HOME"
-  getent:
-    database: passwd
-    key: "{{ asdf_user }}"
-    split: ":"
-  when: asdf_dir is undefined
-
-- name: "set asdf_config_file based on home directory"
-  set_fact:
-    asdf_config_file: "{{ ansible_facts.getent_passwd[asdf_user][4] }}/.asdfrc"
-  when: asdf_dir is undefined and asdf_config_file is undefined
-
-- name: "set asdf_default_tool_versions_file based on home directory"
-  set_fact:
-    asdf_default_tool_versions_file: "{{ ansible_facts.getent_passwd[asdf_user][4] }}/.tool-versions"
-  when: asdf_dir is undefined and asdf_default_tool_versions_file is undefined
-
-- name: "set asdf_dir variable based on home directory"
-  set_fact:
-    asdf_dir: "{{ ansible_facts.getent_passwd[asdf_user][4] }}/.asdf"
-  when: asdf_dir is undefined
-
-- name: "set asdf_config_file variable based on asdf_dir"
+- name: "set asdf_config_file based on asdf_dir"
   set_fact:
     asdf_config_file: "{{ asdf_dir }}/asdfrc"
   when: asdf_config_file is undefined
 
-- name: "set asdf_default_tool_versions_file variable based on asdf_dir"
+- name: "set asdf_default_tool_versions_file based on asdf_dir"
   set_fact:
     asdf_default_tool_versions_file: "{{ asdf_dir }}/tool-versions"
   when: asdf_default_tool_versions_file is undefined
@@ -66,6 +44,7 @@
     path: "{{ asdf_dir }}"
     owner: "{{ asdf_user }}"
     group: "{{ asdf_group }}"
+    mode: "0775"
     state: directory
   become: True
 

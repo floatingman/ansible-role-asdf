@@ -1,14 +1,14 @@
 # {{ ansible_managed }}
 
-[ -n "$BASH_VERSION" ] || return 0
-
-# Set ASDF data directory
+# Set ASDF data directory (system-wide)
 export ASDF_DATA_DIR="{{ asdf_dir }}"
 
 # Add asdf shims to PATH
-export PATH="{{ asdf_dir }}/shims:$PATH"
+if [ -d "{{ asdf_dir }}/shims" ]; then
+    export PATH="{{ asdf_dir }}/shims:$PATH"
+fi
 
 # Set up shell completions (optional)
 if command -v asdf >/dev/null 2>&1; then
-  . <(asdf completion bash 2>/dev/null || true)
+    . <(asdf completion bash 2>/dev/null || true)
 fi
