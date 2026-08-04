@@ -1,14 +1,29 @@
 # {{ ansible_managed }}
+# asdf ({{ asdf_version }}) system-wide setup. Shell-agnostic: works under
+# sh, bash, and zsh. Sourced by login shells via /etc/profile.d.
+#
+# Notes:
+#   * Do NOT gate this on $BASH_VERSION — that made the whole file a no-op for
+#     zsh, so asdf shims were never added to PATH for zsh users.
+#   * Set ASDF_DIR explicitly: asdf.sh / the shims can only auto-detect it under
+#     bash/zsh/ksh, so setting it here makes every shell work.
+#   * Completions use `eval "$(...)"` (POSIX-safe) instead of the bash/zsh-only
+#     `<(...)` process substitution, so this file parses cleanly under plain sh.
 
-[ -n "$BASH_VERSION" ] || return 0
-
-# Set ASDF data directory
+export ASDF_DIR="{{ asdf_dir }}"
 export ASDF_DATA_DIR="{{ asdf_dir }}"
 
-# Add asdf shims to PATH
-export PATH="{{ asdf_dir }}/shims:$PATH"
+# Add asdf shims to PATH (idempotent)
+case ":${PATH}:" in
+    *":${ASDF_DIR}/shims:"*) ;;
+    *) export PATH="${ASDF_DIR}/shims:${PATH}" ;;
+esac
 
-# Set up shell completions (optional)
+# Shell-specific completions (optional, non-fatal).
 if command -v asdf >/dev/null 2>&1; then
-  . <(asdf completion bash 2>/dev/null || true)
+    if [ -n "${BASH_VERSION:-}" ]; then
+        eval "$(asdf completion bash 2>/dev/null)" 2>/dev/null || true
+    elif [ -n "${ZSH_VERSION:-}" ]; then
+        eval "$(asdf completion zsh 2>/dev/null)" 2>/dev/null || true
+    fi
 fi

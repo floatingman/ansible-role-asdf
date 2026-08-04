@@ -63,6 +63,8 @@ asdf_version: v0.18.0
 
 **Note:** Starting with version 0.16.0, ASDF is written in Go and requires compilation during installation. The role automatically handles building the binary after cloning the repository.
 
+**0.16+ shell setup:** The `/etc/profile.d/asdf.sh` written by this role is shell-agnostic (works under `sh`, `bash`, **and `zsh`**) — it sets `ASDF_DIR`/`ASDF_DATA_DIR`, adds the shims to `PATH`, and enables per-shell completions via `eval "$(asdf completion …)"`. It is no longer bash-only. Additionally, the role points the legacy `bin/asdf` wrapper (which asdf 0.16+ keeps for migration and which prints the "upgrade to 0.16" notice on every call) at the Go binary, so shims that still reference `bin/asdf` route through Go with no notice.
+
 ## Dependencies
 
 None
