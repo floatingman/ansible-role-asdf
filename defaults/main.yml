@@ -18,11 +18,11 @@ asdf_plugins: []
 #     global: 20.1
 
 asdf_apt_global_dependencies: ["unzip", "git", "curl", "autoconf", "automake", "gcc",
-  "g++", "make", "patch", "pkg-config", "binutils", "libtool", "bison", "libreadline-dev", "golang-go"]
+  "g++", "make", "patch", "pkg-config", "binutils", "libtool", "bison", "libreadline-dev"]
 asdf_yum_global_dependencies: ["unzip", "git", "curl", "autoconf", "automake", "gcc",
-  "gcc-c++", "make", "patch", "pkgconfig", "binutils", "libtool", "bison", "readline-devel", "golang"]
+  "gcc-c++", "make", "patch", "pkgconfig", "binutils", "libtool", "bison", "readline-devel"]
 asdf_pacman_global_dependencies: ["unzip", "git", "curl", "autoconf", "automake", "gcc",
-  "make", "patch", "pkgconf", "binutils", "libtool", "bison", "readline", "go"]
+  "make", "patch", "pkgconf", "binutils", "libtool", "bison", "readline"]
 
 asdf_apt_optional_dependencies: []
 asdf_yum_optional_dependencies: []

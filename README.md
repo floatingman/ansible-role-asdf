@@ -6,7 +6,7 @@ An Ansible Role that installs [asdf](https://github.com/asdf-vm/asdf.git) versio
 
 ## Requirements
 
-- Go (golang) is required for building ASDF version 0.16.0 and newer. The role automatically installs Go as a dependency on supported platforms (Debian/Ubuntu, RedHat/CentOS, Arch Linux).
+- None for the asdf binary itself. Since 0.16.0 (the Go rewrite) the role installs the official prebuilt release binary — no Go toolchain is needed. (Earlier versions of this role built from source, which failed on Debian 11/Ubuntu 22.04: apt's `golang-go` 1.18 cannot parse the three-part `go 1.23.4` directive in asdf's go.mod.)
 
 ## Role Variables
 
@@ -61,7 +61,7 @@ The variable `asdf_version` sets the git tag of asdf:
 asdf_version: v0.18.0
 ```
 
-**Note:** Starting with version 0.16.0, ASDF is written in Go and requires compilation during installation. The role automatically handles building the binary after cloning the repository.
+**Note:** Starting with version 0.16.0, ASDF is written in Go. The role downloads the matching prebuilt release binary for the platform (`asdf-<version>-<os>-<arch>.tar.gz`) and installs it to `{{ asdf_dir }}/asdf`; the checksum-aware copy also refreshes the binary automatically when `asdf_version` changes.
 
 **0.16+ shell setup:** The `/etc/profile.d/asdf.sh` written by this role is shell-agnostic (works under `sh`, `bash`, **and `zsh`**) — it sets `ASDF_DIR`/`ASDF_DATA_DIR`, adds the shims to `PATH`, and enables per-shell completions via `eval "$(asdf completion …)"`. It is no longer bash-only. Additionally, the role points the legacy `bin/asdf` wrapper (which asdf 0.16+ keeps for migration and which prints the "upgrade to 0.16" notice on every call) at the Go binary, so shims that still reference `bin/asdf` route through Go with no notice.
 

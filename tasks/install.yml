@@ -83,20 +83,52 @@
   become: True
   become_user: "{{ asdf_user }}"
 
-- name: "check if asdf binary exists"
-  stat:
-    path: "{{ asdf_dir }}/asdf"
-  register: asdf_binary_stat
+# asdf v0.16+ (the Go rewrite) publishes prebuilt release binaries. Building
+# from source needs a Go toolchain new enough for the go.mod `go` directive —
+# apt's golang-go on Debian 11/Ubuntu 22.04 is Go 1.18, which cannot even
+# parse the three-part directive ("invalid go version '1.23.4': must match
+# format 1.23"), so `make build` failed there. Installing the release binary
+# needs no compiler, and copy's checksum comparison replaces the binary on
+# version bumps (the old `make build` + `creates:` guard kept a stale binary
+# after a bump anyway).
+- name: "map platform to asdf release asset"
+  set_fact:
+    asdf_release: >-
+      asdf-{{ asdf_version }}-{{ {'Darwin': 'darwin', 'Linux': 'linux'}[ansible_facts['system']] }}-{{ {'x86_64': 'amd64', 'i386': '386', 'i686': '386', 'aarch64': 'arm64', 'arm64': 'arm64'}[ansible_facts['architecture']] }}
 
-- name: "build asdf binary"
-  command: make build
-  args:
-    chdir: "{{ asdf_dir }}"
-    creates: "{{ asdf_dir }}/asdf"
+- name: "download asdf release archive"
+  get_url:
+    url: "https://github.com/asdf-vm/asdf/releases/download/{{ asdf_version }}/{{ asdf_release }}.tar.gz"
+    dest: "/tmp/{{ asdf_release }}.tar.gz"
+    mode: "0644"
   become: True
   become_user: "{{ asdf_user }}"
-  environment:
-    PATH: "/usr/local/bin:/usr/bin:{{ ansible_facts.env.PATH }}"
+
+- name: "create asdf release extract directory"
+  file:
+    path: "/tmp/{{ asdf_release }}"
+    state: directory
+    mode: "0700"
+  become: True
+  become_user: "{{ asdf_user }}"
+
+- name: "extract asdf release archive"
+  unarchive:
+    src: "/tmp/{{ asdf_release }}.tar.gz"
+    dest: "/tmp/{{ asdf_release }}"
+    remote_src: true
+    creates: "/tmp/{{ asdf_release }}/asdf"
+  become: True
+  become_user: "{{ asdf_user }}"
+
+- name: "install asdf binary"
+  copy:
+    src: "/tmp/{{ asdf_release }}/asdf"
+    dest: "{{ asdf_dir }}/asdf"
+    mode: "0755"
+    remote_src: true
+  become: True
+  become_user: "{{ asdf_user }}"
 
 # asdf 0.16+ (the Go rewrite) ships BOTH the Go binary ({{ asdf_dir }}/asdf) and
 # a legacy bash wrapper ({{ asdf_dir }}/bin/asdf) that prints the "upgrade to
@@ -106,7 +138,7 @@
 # shims route through Go: no notice, and the (working) Go exec path. asdf 0.18
 # writes fresh shims as `exec asdf exec ...` (bare asdf -> /usr/local/bin/asdf
 # -> Go), which is also correct. The git clone restores the legacy bin/asdf on
-# version bumps, so this runs after clone/build each run (idempotent, force:yes).
+# version bumps, so this runs after clone/install each run (idempotent, force:yes).
 - name: "point legacy bin/asdf at the Go binary (silence migration notice)"
   file:
     src: "{{ asdf_dir }}/asdf"
