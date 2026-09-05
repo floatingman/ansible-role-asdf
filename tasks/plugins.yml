@@ -62,6 +62,35 @@
   when: '"php" in item["name"]'
   loop: "{{ asdf_plugins }}"
 
+- name: "check if pinned versions are known to their plugin"
+  command: "asdf list all {{ item.0.name }} {{ item.1 }}"
+  environment:
+    PATH: "/usr/local/bin:{{ ansible_facts.env.PATH }}"
+    ASDF_DATA_DIR: "{{ asdf_dir }}"
+  loop: "{{ asdf_plugins | subelements('versions', skip_missing=True) }}"
+  when: asdf_plugins | length > 0
+  become: True
+  become_user: "{{ asdf_user }}"
+  register: asdf_pinned_version_check
+  changed_when: False
+  failed_when: False
+
+- name: "update plugins that don't know a pinned version"
+  command: "asdf plugin update {{ item }}"
+  environment:
+    PATH: "/usr/local/bin:{{ ansible_facts.env.PATH }}"
+    ASDF_DATA_DIR: "{{ asdf_dir }}"
+  loop: "{{ asdf_pinned_version_check.results
+            | selectattr('rc', 'defined')
+            | selectattr('rc', 'ne', 0)
+            | map(attribute='item.0.name')
+            | unique }}"
+  loop_control:
+    label: "{{ item }}"
+  when: asdf_plugins | length > 0
+  become: True
+  become_user: "{{ asdf_user }}"
+
 - name: "install apps"
   command: "asdf install {{ item.0.name }} {{ item.1 }}"
   args:
